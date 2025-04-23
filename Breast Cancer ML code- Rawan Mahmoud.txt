@@ -1,0 +1,436 @@
+''' This Machine Learning Model is conducted to observe several feautures in 
+the process detection and classification of breast cancer either malignant or benign'''  
+
+#step1: EDA-Explorinng Data Analysis
+import pandas as pd
+import sklearn as sl
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sklearn as snk
+import numpy as np
+
+df= pd.read_csv('Breast Cancer Wisconsin.csv')
+df = pd.DataFrame(df)
+
+print(df.info())
+print(df.describe())
+print(df.shape)
+print(df.isna().sum())
+
+sns.pairplot(df)
+print(df.corr())
+sns.heatmap(df.corr(), annot=True , cmap='coolwarm')
+print(df.describe())
+
+#step2: Data Preprossesing 
+from sklearn.preprocessing import StandardScaler #features scalling
+scaler= StandardScaler()
+df[['id','radius_mean','texture_mean','perimeter_mean','area_mean','area_worst','radius_worst','texture_worst','perimeter_worst']]= scaler.fit_transform (df[['id','radius_mean','texture_mean','perimeter_mean','area_mean','area_worst','radius_worst','texture_worst','perimeter_worst']])
+print(df.head(1))
+
+ #categrocal data into numerical
+from sklearn.preprocessing import LabelEncoder
+le = ['diagnosis']
+df[le] = df[le].apply(LabelEncoder().fit_transform)
+print(df.columns)
+print(df.sample(3)) 
+
+x= df.drop(['diagnosis'],axis=1)
+x.columns
+y= df['diagnosis']
+
+'''Encoded_df=pd.get_dummies(df['diagnosis'],dtype=int) #hot label encoder-categrocal data into numerical
+print(Encoded_df.columns)
+df= pd.concat([df,Encoded_df],axis=1)
+df= df.drop(['diagnosis'],axis=1)
+print(df.columns)  
+print(df.sample(3))'''
+
+#step 3: Dataset splitting
+from sklearn.model_selection import train_test_split 
+x_train, x_test, y_train, y_test = train_test_split (x, y, test_size=0.25, random_state = 0)
+print(x_train.shape)
+print(x_test.shape)
+print(y_train.shape)
+print(y_test.shape)
+
+#step 4: Machine Learning Model intiatlization-Training
+
+#A-Logestic Regression
+from sklearn.linear_model import LogisticRegression
+logesticModel = LogisticRegression(random_state = 0)
+logesticModel.fit(x_train, y_train)
+
+#B-KNN
+from sklearn.neighbors import KNeighborsClassifier
+knnModel = KNeighborsClassifier(n_neighbors=30)
+knnModel.fit(x_train,y_train)
+
+#C-Naive Bayes
+from sklearn.naive_bayes import GaussianNB
+naive_Model = GaussianNB()
+naive_Model.fit(x_train, y_train)
+
+#D-Decision Tree
+from sklearn.tree import DecisionTreeClassifier
+tree_Model = DecisionTreeClassifier(criterion = 'entropy', random_state = 0)
+tree_Model.fit(x_train, y_train)
+
+#E-Random Forest
+from sklearn.ensemble import RandomForestClassifier
+forest_Model = RandomForestClassifier(n_estimators = 10, criterion = 'entropy', random_state = 0)
+forest_Model.fit(x_train, y_train)
+
+#F-Kernel SVM Algorithm
+from sklearn.svm import SVC
+kernel_Model = SVC(kernel = 'rbf', random_state = 0)
+kernel_Model.fit(x_train, y_train)
+
+#G-Support Vector Machine
+from sklearn.svm import SVC
+svc_Model = SVC(kernel = 'linear', random_state = 0)
+svc_Model.fit(x_train, y_train)
+
+#step 5: Models Prediction
+predict= logesticModel.predict(x_test)
+predict2 = knnModel.predict(x_test)
+predict3 = naive_Model.predict(x_test)
+predict4 = tree_Model.predict(x_test)
+predict5 = forest_Model.predict(x_test)
+predict6 = kernel_Model.predict(x_test)
+predict7 = svc_Model.predict(x_test)
+
+#step 6: Data Evaluation (report) 
+# function for reading reports
+from sklearn import metrics
+def reports():
+    report = metrics.classification_report(y_test,predict)
+    print("Logistic regression report")
+    print(report)
+
+    class_report = metrics.classification_report(y_test,predict2)
+    print("KNN report")
+    print(class_report)
+
+    class_report = metrics.classification_report(y_test,predict3)
+    print("Naive Bayes report")
+    print(class_report)
+
+    class_report = metrics.classification_report(y_test,predict4)
+    print("Decision Tree report")
+    print(class_report)
+
+    class_report = metrics.classification_report(y_test,predict5)
+    print("Random Forest report")
+    print(class_report)
+
+    class_report = metrics.classification_report(y_test,predict6)
+    print(" Kernel SVM Algorithm report")
+    print(class_report)
+
+    class_report = metrics.classification_report(y_test,predict7)
+    print("Support Vector Machine report")
+    print(class_report)
+
+print(reports())
+
+
+# Models error and percision percentages
+# function for models evaluation
+
+from sklearn import metrics
+def evaluate():
+    #logistic regression
+    accuracy  = metrics.accuracy_score(y_test,predict)
+    recall = metrics.recall_score(y_test,predict)
+    precision = metrics.precision_score(y_test,predict)
+    f1_score = metrics.f1_score(y_test,predict)
+
+    print("Logistic regression report")
+    print(f'Model Accuracy = {100*accuracy:0.25} %' )
+    print(f'Model recall = {100*recall:0.25} %' )
+    print(f'Model precision = {100*precision:0.25} %' )
+    print(f'Model f1_score = {100*f1_score:0.25} %' )
+    print(metrics.mean_absolute_error(y_test,predict))
+    print(metrics.mean_squared_error(y_test,predict))
+    print(np.sqrt(metrics.mean_squared_error(y_test,predict)))
+    print(round(metrics.r2_score(y_test,predict),3))
+
+    #KNN Model
+    accuracy  = metrics.accuracy_score(y_test,predict2)
+    recall = metrics.recall_score(y_test,predict2)
+    precision = metrics.precision_score(y_test,predict2)
+    f1_score = metrics.f1_score(y_test,predict2)
+
+    print("KNN report")
+    print(f'Model Accuracy = {100*accuracy:0.25} %' )
+    print(f'Model recall = {100*recall:0.25} %' )
+    print(f'Model precision = {100*precision:0.25} %' )
+    print(f'Model f1_score = {100*f1_score:0.25} %' )
+    print(metrics.mean_absolute_error(y_test,predict2))
+    print(metrics.mean_squared_error(y_test,predict2))
+    print(np.sqrt(metrics.mean_squared_error(y_test,predict2)))
+    print(round(metrics.r2_score(y_test,predict2),3))
+   
+
+    error_rate = []
+
+    for i in range(1,40):
+
+        Knn_tuning = KNeighborsClassifier(n_neighbors=i)
+
+        Knn_tuning.fit(x_train,y_train)
+
+        predict_i= Knn_tuning.predict(x_test)
+
+        error_rate.append(np.mean(predict_i != y_test))
+    plt.figure(figsize=(10,6))
+    plt.plot(range(1,40), error_rate, color='blue', linestyle = 'dashed', marker = 'o', markerfacecolor = 'red', markersize = 10)
+    plt.title("Error rate VS K")
+
+
+    #Naive Bayes
+    accuracy  = metrics.accuracy_score(y_test,predict3)
+    recall = metrics.recall_score(y_test,predict3)
+    precision = metrics.precision_score(y_test,predict3)
+    f1_score = metrics.f1_score(y_test,predict3)
+
+    print(f'Model Accuracy = {100*accuracy:0.25} %' )
+    print(f'Model recall = {100*recall:0.25} %' )
+    print(f'Model precision = {100*precision:0.25} %' )
+    print(f'Model f1_score = {100*f1_score:0.25} %' )
+    print(metrics.mean_absolute_error(y_test,predict3))
+    print(metrics.mean_squared_error(y_test,predict3))
+    print(np.sqrt(metrics.mean_squared_error(y_test,predict3)))
+    print(round(metrics.r2_score(y_test,predict3),3))
+
+    #Decision tree
+    accuracy  = metrics.accuracy_score(y_test,predict4)
+    recall = metrics.recall_score(y_test,predict4)
+    precision = metrics.precision_score(y_test,predict4)
+    f1_score = metrics.f1_score(y_test,predict4)
+
+    print("Decision Tree report")
+    print(f'Model Accuracy = {100*accuracy:0.25} %' )
+    print(f'Model recall = {100*recall:0.25} %' )
+    print(f'Model precision = {100*precision:0.25} %' )
+    print(f'Model f1_score = {100*f1_score:0.25} %' )
+    print(metrics.mean_absolute_error(y_test,predict4))
+    print(metrics.mean_squared_error(y_test,predict4))
+    print(np.sqrt(metrics.mean_squared_error(y_test,predict4)))
+    print(round(metrics.r2_score(y_test,predict4),3))
+
+    #Random Forest
+    accuracy  = metrics.accuracy_score(y_test,predict5)
+    recall = metrics.recall_score(y_test,predict5)
+    precision = metrics.precision_score(y_test,predict5)
+    f1_score = metrics.f1_score(y_test,predict5)
+
+    print("Random Forest report")
+    print(f'Model Accuracy = {100*accuracy:0.25} %' )
+    print(f'Model recall = {100*recall:0.25} %' )
+    print(f'Model precision = {100*precision:0.25} %' )
+    print(f'Model f1_score = {100*f1_score:0.25} %' )
+    print(metrics.mean_absolute_error(y_test,predict5))
+    print(metrics.mean_squared_error(y_test,predict5))
+    print(np.sqrt(metrics.mean_squared_error(y_test,predict5)))
+    print(round(metrics.r2_score(y_test,predict5),3))
+
+    #Kernel SVM Algorithm
+    accuracy  = metrics.accuracy_score(y_test,predict6)
+    recall = metrics.recall_score(y_test,predict6)
+    precision = metrics.precision_score(y_test,predict6)
+    f1_score = metrics.f1_score(y_test,predict6)
+
+    print(" Kernel SVM Algorithm report")
+    print(f'Model Accuracy = {100*accuracy:0.25} %' )
+    print(f'Model recall = {100*recall:0.25} %' )
+    print(f'Model precision = {100*precision:0.25} %' )
+    print(f'Model f1_score = {100*f1_score:0.25} %' )
+    print(metrics.mean_absolute_error(y_test,predict6))
+    print(metrics.mean_squared_error(y_test,predict6))
+    print(np.sqrt(metrics.mean_squared_error(y_test,predict6)))
+    print(round(metrics.r2_score(y_test,predict6),3))
+
+    #SVM 
+    accuracy  = metrics.accuracy_score(y_test,predict7)
+    recall = metrics.recall_score(y_test,predict7)
+    precision = metrics.precision_score(y_test,predict7)
+    f1_score = metrics.f1_score(y_test,predict7)
+
+    print("Support Vector Machine report")
+    print(f'Model Accuracy = {100*accuracy:0.25} %' )
+    print(f'Model recall = {100*recall:0.25} %' )
+    print(f'Model precision = {100*precision:0.25} %' )
+    print(f'Model f1_score = {100*f1_score:0.25} %' )
+    print(metrics.mean_absolute_error(y_test,predict7))
+    print(metrics.mean_squared_error(y_test,predict7))
+    print(np.sqrt(metrics.mean_squared_error(y_test,predict7)))
+    print(round(metrics.r2_score(y_test,predict7),3))
+
+print(evaluate())
+
+# Function for Confusion Matrices
+
+def confusion_matrix():
+    print("Logistic Regression confusion matrix")
+    from sklearn.metrics import confusion_matrix
+    import matplotlib.pyplot as plt
+
+    cf_matrix = confusion_matrix(y_test,predict)
+    print(cf_matrix)
+    
+    import seaborn as sns
+    ax = sns.heatmap(cf_matrix, annot=True, cmap='Blues')
+    ax.set_title('Seaborn Confusion Matrix with labels\n\n')
+    ax.set_xlabel('\nPredicted Values')
+    ax.set_ylabel('Actual Values ')
+    ax.xaxis.set_ticklabels(['0','1'])
+    ax.yaxis.set_ticklabels(['0','1'])
+
+    print("KNN confusion matrix")
+
+    cf_matrix = confusion_matrix(y_test,predict2)
+    print(cf_matrix)
+
+    ax = sns.heatmap(cf_matrix, annot=True, cmap='Blues')
+    ax.set_title('Seaborn Confusion Matrix with labels\n\n')
+    ax.set_xlabel('\nPredicted Values')
+    ax.set_ylabel('Actual Values ')
+    ax.xaxis.set_ticklabels(['0','1'])
+    ax.yaxis.set_ticklabels(['0','1'])
+
+    print("Naive Bayes confusion matrix")
+
+    cf_matrix = confusion_matrix(y_test,predict3)
+    print(cf_matrix)
+
+    ax = sns.heatmap(cf_matrix, annot=True, cmap='Blues')
+    ax.set_title('Seaborn Confusion Matrix with labels\n\n')
+    ax.set_xlabel('\nPredicted Values')
+    ax.set_ylabel('Actual Values ')
+    ax.xaxis.set_ticklabels(['0','1'])
+    ax.yaxis.set_ticklabels(['0','1'])
+
+
+    print("Decision Tree confusion matrix")
+
+    cf_matrix = confusion_matrix(y_test,predict4)
+    print(cf_matrix)
+    
+    ax = sns.heatmap(cf_matrix, annot=True, cmap='Blues')
+    ax.set_title('Seaborn Confusion Matrix with labels\n\n')
+    ax.set_xlabel('\nPredicted Values')
+    ax.set_ylabel('Actual Values ')
+    ax.xaxis.set_ticklabels(['0','1'])
+    ax.yaxis.set_ticklabels(['0','1'])
+
+    print("Random Forest confusion matrix")
+
+    cf_matrix = confusion_matrix(y_test,predict5)
+    print(cf_matrix)
+
+    ax = sns.heatmap(cf_matrix, annot=True, cmap='Blues')
+    ax.set_title('Seaborn Confusion Matrix with labels\n\n')
+    ax.set_xlabel('\nPredicted Values')
+    ax.set_ylabel('Actual Values ')
+    ax.xaxis.set_ticklabels(['0','1'])
+    ax.yaxis.set_ticklabels(['0','1'])
+
+    print("Kernel SVM Algorithm confusion matrix")
+
+    cf_matrix = confusion_matrix(y_test,predict6)
+    print(cf_matrix)
+    
+    ax = sns.heatmap(cf_matrix, annot=True, cmap='Blues')
+    ax.set_title('Seaborn Confusion Matrix with labels\n\n')
+    ax.set_xlabel('\nPredicted Values')
+    ax.set_ylabel('Actual Values ')
+    ax.xaxis.set_ticklabels(['0','1'])
+    ax.yaxis.set_ticklabels(['0','1'])
+
+    print("Support Vector Machine  confusion matrix")
+
+    cf_matrix = confusion_matrix(y_test,predict7)
+    print(cf_matrix)
+
+    ax = sns.heatmap(cf_matrix, annot=True, cmap='Blues')
+    ax.set_title('Seaborn Confusion Matrix with labels\n\n')
+    ax.set_xlabel('\nPredicted Values')
+    ax.set_ylabel('Actual Values ')
+    ax.xaxis.set_ticklabels(['0','1'])
+    ax.yaxis.set_ticklabels(['0','1'])
+
+print(confusion_matrix())
+
+#Function for ROC curves
+
+def roc():
+
+    print("Logistic Regression ROC Curve")
+    from sklearn.metrics import roc_curve
+    y_pred_proba = logesticModel.predict_proba(x_test)[::,1]
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba) 
+    plt.figure(figsize=(6,4))
+    plt.plot(fpr, tpr, linewidth=2)
+    plt.plot([0,1], [0,1], 'k--' )
+    plt.rcParams['font.size'] = 12
+    plt.title('ROC curve for Breast Cancer classifier')
+    plt.xlabel('False Positive Rate ')
+    plt.ylabel('True Positive Rate ')
+    plt.show()
+
+    print("KNN ROC Curve")
+    y_pred_proba = knnModel.predict_proba(x_test)[::,1]
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba) 
+    plt.figure(figsize=(6,4))
+    plt.plot(fpr, tpr, linewidth=2)
+    plt.plot([0,1], [0,1], 'k--' )
+    plt.rcParams['font.size'] = 12
+    plt.title('ROC curve for Breast Cancer classifier')
+    plt.xlabel('False Positive Rate ')
+    plt.ylabel('True Positive Rate ')
+    plt.show()
+
+    print("Naive Bayes ROC Curve")
+    y_pred_proba = naive_Model.predict_proba(x_test)[::,1]
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba) 
+    plt.figure(figsize=(6,4))
+    plt.plot(fpr, tpr, linewidth=2)
+    plt.plot([0,1], [0,1], 'k--' )
+    plt.rcParams['font.size'] = 12
+    plt.title('ROC curve for Breast Cancer classifier')
+    plt.xlabel('False Positive Rate ')
+    plt.ylabel('True Positive Rate ')
+    plt.show()
+
+    print("Decision Tree ROC Curve")
+    y_pred_proba = tree_Model.predict_proba(x_test)[::,1]
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba) 
+    plt.figure(figsize=(6,4))
+    plt.plot(fpr, tpr, linewidth=2)
+    plt.plot([0,1], [0,1], 'k--' )
+    plt.rcParams['font.size'] = 12
+    plt.title('ROC curve for Breast Cancer classifier')
+    plt.xlabel('False Positive Rate ')
+    plt.ylabel('True Positive Rate ')
+    plt.show()
+
+    print("Random Forest ROC Curve")
+    y_pred_proba = forest_Model.predict_proba(x_test)[::,1]
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba) 
+    plt.figure(figsize=(6,4))
+    plt.plot(fpr, tpr, linewidth=2)
+    plt.plot([0,1], [0,1], 'k--' )
+    plt.rcParams['font.size'] = 12
+    plt.title('ROC curve for Breast Cancer classifier')
+    plt.xlabel('False Positive Rate ')
+    plt.ylabel('True Positive Rate ')
+    plt.show()
+
+print (roc())
+
+
+'''Conclusion: Random Forest is the best model fit according 
+to the percentage of accuracy, predictions, and error rate
+'''
