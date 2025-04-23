@@ -1,5 +1,5 @@
 # Breas-Cancer-prediction-Machine-Learning-Model
-This machine learning model is designed using python to detect and classify breast cancer as either benign or malignant based on the dataset from the Breast Cancer Wisconsin dataset. The model performs several key steps from data processing to evaluation algorithms.
+This machine learning model is designed using python to detect and classify breast cancer as either benign or malignant based on the dataset from a Breast Cancer  dataset. The model performs several key steps from data processing to evaluation algorithms.
 
 Steps
 1. Exploratory Data Analysis (EDA)
